@@ -1,0 +1,44 @@
+#!/bin/bash
+
+<<note
+This script will take backup of any folder provided as argument
+
+./backup.sh <folder name
+note
+
+function show_date(){
+        echo "date '+%Y-%m-%d_%H-%M-%S'"
+}
+
+function create_backup(){
+
+        timestamp=$(date '+%Y-%m-%d_%H-%M-%S')
+        backup_file="/home/ubuntu/backups/backup_${timestamp}.zip"
+        echo "Printing " $1
+        zip -r $backup_file $1
+}
+
+function backup_rotation(){
+        num_of_days_backup_retention=7
+        num_of_all_backups=$(ls -t $backup_folder | grep -c 'backup_')
+        num_of_backups_to_remove=$((num_of_all_backups - num_of_days_backup_retention))
+        echo $num_of_all_backups
+        echo "empty"
+        echo $num_of_backups_to_remove
+
+        if [[ $num_of_backups_to_remove -gt 0 ]]; then
+                old_backups=$(ls -t "$backup_folder" | grep 'backup_' | sort | head -n $num_of_backups_to_remove)
+                echo "here"
+
+                for old_backup in $old_backups; do
+                        rm "$backup_folder/$old_backup"
+                        echo "Removed old backup: $old_backup"
+                done
+        fi
+}
+
+backup_folder=/home/ubuntu/backups
+echo "backup started"
+show_date
+create_backup $1
+backup_rotation
